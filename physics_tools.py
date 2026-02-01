@@ -1,5 +1,6 @@
 import numpy as np
 import sympy as sp
+from math import floor, log10
 
 def propagate_error(formula, variables_map, errors_map, precision):
     """
@@ -50,3 +51,57 @@ def propagate_error(formula, variables_map, errors_map, precision):
     rounded_error = np.round(total_error, precision)
     
     return rounded_values, rounded_error
+
+
+def propagate_error_2(formula, variables_map, errors_map, sig_figs):
+    """
+    Calculates propagated error using symbolic differentiation and 
+    rounds results based on experimental physics significant figure rules.
+    """
+    symbols = list(variables_map.keys())
+    
+    # 1. Calculate partial derivatives
+    derivatives = {s: sp.diff(formula, s) for s in symbols}
+    
+    # 2. Lambdify the formula and its derivatives
+    f_func = sp.lambdify(symbols, formula, "numpy")
+    df_funcs = {s: sp.lambdify(symbols, derivatives[s], "numpy") for s in symbols}
+    
+    # 3. Prepare numerical inputs and handle broadcasting
+    max_len = max(len(np.atleast_1d(v)) for v in variables_map.values())
+    ordered_values = []
+    ordered_errors = []
+    
+    for s in symbols:
+        v = np.atleast_1d(variables_map[s])
+        e = np.atleast_1d(errors_map[s])
+        if len(v) == 1 and max_len > 1:
+            v, e = np.tile(v, max_len), np.tile(e, max_len)
+        ordered_values.append(v)
+        ordered_errors.append(e)
+    
+    # 4. Calculate Nominal Values
+    nominal_values = f_func(*ordered_values)
+    
+    # 5. Calculate Propagated Error (Square Root of Sum of Squares)
+    squared_error_sum = np.zeros(max_len)
+    for i, s in enumerate(symbols):
+        deriv_val = df_funcs[s](*ordered_values)
+        squared_error_sum += (deriv_val * ordered_errors[i])**2
+    
+    total_error = np.sqrt(squared_error_sum)
+
+    # 6. Smart Rounding Logic
+    def smart_round(val, err):
+        if err == 0 or not np.isfinite(err):
+            return val, err
+        # Calculate the decimal place to round to based on error magnitude
+        precision = -int(floor(log10(abs(err)))) + (sig_figs - 1)
+        return round(val, precision), round(err, precision)
+
+    # 7. Final Processing
+    if max_len == 1:
+        return smart_round(nominal_values[0], total_error[0])
+    
+    rounded_pairs = [smart_round(v, e) for v, e in zip(nominal_values, total_error)]
+    return np.array([r[0] for r in rounded_pairs]), np.array([r[1] for r in rounded_pairs])
