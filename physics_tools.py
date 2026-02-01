@@ -1,3 +1,5 @@
+import numpy as np
+import sympy as sp
 
 def propagate_error(formula, variables_map, errors_map, precision):
     """
