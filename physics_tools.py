@@ -1,3 +1,5 @@
+import numpy as np
+import sympy as sp
 
 def propagate_error(formula, variables_map, errors_map, precision):
     """
@@ -13,8 +15,7 @@ def propagate_error(formula, variables_map, errors_map, precision):
     - nominal_values: Rounded result of the formula.
     - total_error: Rounded propagated uncertainty.
     """
-    import numpy as np
-    import sympy as sp
+
     # 1. Identify all symbols in the formula
     symbols = list(variables_map.keys())
     
