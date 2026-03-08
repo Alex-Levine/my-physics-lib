@@ -105,3 +105,57 @@ def propagate_error_2(formula, variables_map, errors_map, sig_figs):
     
     rounded_pairs = [smart_round(v, e) for v, e in zip(nominal_values, total_error)]
     return np.array([r[0] for r in rounded_pairs]), np.array([r[1] for r in rounded_pairs])
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import linregress
+
+def plot_and_save_regression_with_errors(x, y, x_err, y_err, x_label, y_label, filename="regression_analysis.png"):
+    # Ensure inputs are numpy arrays
+    x = np.array(x)
+    y = np.array(y)
+    
+    # Perform linear regression using linregress
+    # res contains: slope, intercept, rvalue, pvalue, stderr, intercept_stderr
+    res = linregress(x, y)
+    
+    slope = res.slope
+    intercept = res.intercept
+    slope_err = res.stderr
+    intercept_err = res.intercept_stderr
+    r_squared = res.rvalue**2
+    
+    # Generate points for the regression line
+    x_line = np.linspace(0.95*np.min(x), 1.05*np.max(x), 100)
+    y_line = slope * x_line + intercept
+    
+    # Create the plot
+    plt.figure(figsize=(12, 7))
+    
+    # Plot data points with error bars
+    plt.errorbar(x, y, xerr=x_err, yerr=y_err, fmt='o', capsize=5, 
+                 label='Data Points', color='black', ecolor = 'grey', markersize=5, alpha=0.8)
+    
+    # Format the legend text with uncertainty: "slope ± error" and "intercept ± error"
+    # We use LaTeX formatting for the plus-minus sign (\pm)
+    sign = "+" if intercept >= 0 else "-"
+    label_text = (f"Fit: $y = ({slope:.2f} \pm {slope_err:.2f})x$ "
+                  f"$ {sign} ({abs(intercept):.2f} \pm {intercept_err:.2f})$\n"
+                  f"$R^2 = {r_squared:.2f}$")
+    
+    # Plot the solid regression line
+    plt.plot(x_line, y_line, color='red', linestyle='-', linewidth=2, label=label_text)
+    
+    # Aesthetics
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.grid(True, which='both', linestyle='--', alpha=0.5)
+    plt.legend(loc='upper left', fontsize='medium', frameon=True)
+    
+    # Save the figure
+    # plt.savefig(filename, dpi=300, bbox_inches='tight')
+    # print(f"Plot saved as {filename}")
+    
+    plt.show()
+
+# --- Test Execution ---
