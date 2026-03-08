@@ -27,3 +27,18 @@ errs = {
 # Run the function
 I_vals,dI_result = propagate_error(my_f, vals, errs,3)
 print(I_vals,dI_result)
+
+#plot_and_save_regression_with_errors example:
+
+x_test = [1.4, 2.43, 3.57, 5.04, 7.91, 7.37, 7.94, 10.96]
+y_test = [7.3, 8.92, 20.03, 21.76, 32.71, 28.43, 30.11, 40.79]
+
+plot_and_save_regression_with_errors(
+    x=x_test, 
+    y=y_test, 
+    x_err=0.5, 
+    y_err=2, 
+    x_label="x axis", 
+    y_label="y axis",
+    filename="linear_fit_uncertainty.png"
+)
