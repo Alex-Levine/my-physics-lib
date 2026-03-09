@@ -1,6 +1,8 @@
 import numpy as np
 import sympy as sp
 from math import floor, log10
+import matplotlib.pyplot as plt
+from scipy.stats import linregress
 
 def propagate_error(formula, variables_map, errors_map, precision):
     """
@@ -106,9 +108,6 @@ def propagate_error_2(formula, variables_map, errors_map, sig_figs):
     rounded_pairs = [smart_round(v, e) for v, e in zip(nominal_values, total_error)]
     return np.array([r[0] for r in rounded_pairs]), np.array([r[1] for r in rounded_pairs])
 
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import linregress
 
 def plot_and_save_regression_with_errors(x, y, x_err, y_err, x_label, y_label, filename="regression_analysis.png"):
     # Ensure inputs are numpy arrays
