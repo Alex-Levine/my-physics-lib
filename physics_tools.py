@@ -5,6 +5,65 @@ import matplotlib.pyplot as plt
 from scipy.stats import linregress
 from matplotlib.ticker import AutoMinorLocator 
 from matplotlib.ticker import ScalarFormatter 
+from IPython.display import display, HTML
+
+
+def display_html_table(
+    values_1, errors_1, 
+    values_2, errors_2, 
+    headers=("Trial", "Experimental", "Theoretical"), 
+    unit=None
+):
+    """
+    Displays a table with two data columns using pure HTML and MathJax.
+    """
+    # 1. Normalize inputs to numpy arrays
+    values_1 = np.atleast_1d(values_1)
+    errors_1 = np.atleast_1d(errors_1)
+    values_2 = np.atleast_1d(values_2)
+    errors_2 = np.atleast_1d(errors_2)
+    
+    # 2. Build the Header with optional units
+    unit_html = f" [{unit}]" if unit else ""
+    header_html = (
+        f"<tr>"
+        f"<th>{headers[0]}</th>"
+        f"<th>{headers[1]}{unit_html}</th>"
+        f"<th>{headers[2]}{unit_html}</th>"
+        f"</tr>"
+    )
+    
+    # 3. Determine row count based on the longest input array
+    max_len = max(len(values_1), len(values_2))
+    
+    # 4. Build the Rows
+    rows_html = ""
+    for i in range(max_len):
+        # Safely extract values or provide empty strings if arrays have mismatched lengths
+        v1_str = f"${values_1[i]} \\pm {errors_1[i]}$" if i < len(values_1) else ""
+        v2_str = f"${values_2[i]} \\pm {errors_2[i]}$" if i < len(values_2) else ""
+        
+        rows_html += (
+            f"<tr>"
+            f"<td style='border: 1px solid #ddd; padding: 8px;'>{i+1}</td>"
+            f"<td style='border: 1px solid #ddd; padding: 8px;'>{v1_str}</td>"
+            f"<td style='border: 1px solid #ddd; padding: 8px;'>{v2_str}</td>"
+            f"</tr>"
+        )
+        
+    # 5. Combine into a styled table string
+    table_html = f"""
+    <table style="border-collapse: collapse; width: 100%; border: 1px solid #444; font-family: sans-serif;">
+        <thead style="background-color: #333; color: white;">
+            {header_html}
+        </thead>
+        <tbody style="text-align: center;">
+            {rows_html}
+        </tbody>
+    </table>
+    """
+    
+    display(HTML(table_html))
 
 
 def propagate_error(formula, variables_map, errors_map, sig_figs):
