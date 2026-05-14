@@ -138,9 +138,9 @@ def plot_and_save_regression_with_errors(x, y, x_err, y_err, x_label, y_label, f
     # Format the legend text with uncertainty: "slope ± error" and "intercept ± error"
     # We use LaTeX formatting for the plus-minus sign (\pm)
     sign = "+" if intercept >= 0 else "-"
-    label_text = (f"Fit: $y = ({slope:.2f} \pm {slope_err:.2f})x$ "
-                  f"$ {sign} ({abs(intercept):.2f} \pm {intercept_err:.2f})$\n"
-                  f"$R^2 = {r_squared:.2f}$")
+    label_text = (f"Fit: $y = ({slope:.3f} \pm {slope_err:.3f})x$ "
+                  f"$ {sign} ({abs(intercept):.3f} \pm {intercept_err:.3f})$\n"
+                  f"$R^2 = {r_squared:.3f}$")
     
     # Plot the solid regression line
     plt.plot(x_line, y_line, color='red', linestyle='-', linewidth=2, label=label_text)
